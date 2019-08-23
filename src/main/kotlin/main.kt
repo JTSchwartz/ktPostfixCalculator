@@ -19,8 +19,10 @@
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.EventHandler
+import javafx.geometry.Orientation
 import javafx.scene.input.KeyCode
 import javafx.geometry.Pos
+import javafx.scene.control.TableView
 import javafx.scene.image.Image
 import tornadofx.*
 import java.util.*
@@ -32,44 +34,62 @@ class CalcApp: App(icon, Gui::class)
 class Gui: View("Postfix Calculator") {
 	private val input = SimpleStringProperty()
 	private var output = SimpleDoubleProperty()
+	private val history = observableListOf<EqSol>()
 
 	override val root = form {
-		fieldset {
-			field("Input") {
-				textfield(input) {
-					onKeyReleased = EventHandler {key ->
-						if(key.code == KeyCode.ENTER) {
-							output.value = postfixCalc(input.value)
-							input.value = ""
+		vbox {
+			fieldset {
+				field("Input") {
+					textfield(input) {
+						onKeyReleased = EventHandler {key ->
+							if(key.code == KeyCode.ENTER) {
+								onClick()
+							}
 						}
 					}
 				}
 			}
-		}
 
-
-		hbox {
-			button("Calculate") {
-				action {
-					output.value = postfixCalc(input.value)
-					input.value = ""
+			hbox {
+				button("Calculate") {
+					action {
+						onClick()
+					}
 				}
-			}
 
-			label("Value: ") {
+				label("Value: ") {
+					style {
+						paddingLeft = 20
+					}
+				}
+
+				label() {
+					bind(output)
+				}
+
 				style {
-					paddingLeft = 20
+					alignment = Pos.CENTER_LEFT
+					paddingBottom = 20
 				}
 			}
 
-			label() {
-				bind(output)
-			}
 
-			style {
-				alignment = Pos.CENTER_LEFT
+
+			tableview<EqSol> {
+				items = history
+				column("Equation", EqSol::eq)
+				column("Solution", EqSol::sol)
+
+				columnResizePolicy = TableView.CONSTRAINED_RESIZE_POLICY
+
 			}
 		}
+	}
+
+	private fun onClick() {
+		output.value = postfixCalc(input.value)
+		history.add(EqSol(input.value, output.value))
+		input.value = ""
 	}
 
 	private fun postfixCalc(eq: String?): Double {
@@ -115,3 +135,5 @@ class Gui: View("Postfix Calculator") {
 		}
 	}
 }
+
+class EqSol (var eq:String, var sol:Double)
