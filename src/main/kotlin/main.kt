@@ -19,7 +19,6 @@
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.EventHandler
-import javafx.geometry.Orientation
 import javafx.scene.input.KeyCode
 import javafx.geometry.Pos
 import javafx.scene.control.TableView
@@ -33,7 +32,7 @@ class CalcApp: App(icon, Gui::class)
 
 class Gui: View("Postfix Calculator") {
 	private val input = SimpleStringProperty()
-	private var output = SimpleDoubleProperty()
+	private var output = SimpleStringProperty()
 	private val history = observableListOf<EqSol>()
 
 	override val root = form {
@@ -87,16 +86,16 @@ class Gui: View("Postfix Calculator") {
 	}
 
 	private fun onClick() {
+		if(input.value == "" || input.value == null) return
+
 		output.value = postfixCalc(input.value)
 		history.add(EqSol(input.value, output.value))
 		input.value = ""
 	}
 
-	private fun postfixCalc(eq: String?): Double {
+	private fun postfixCalc(eq: String?): String {
 		try {
-			if(eq == null) {
-				return 0.0
-			}
+			if (eq == null) return "Null Equation"
 
 			val eqSplit = eq.split(" ")
 			val stack = Stack<Double>()
@@ -118,14 +117,16 @@ class Gui: View("Postfix Calculator") {
 							val y = stack.pop()
 							stack.push(y / x)
 						}
-						else -> return 0.0
+						else -> return "Unknown Operator"
 					}
 				}
 			}
 
-			return stack.pop()
+			val endResult = stack.pop()
+
+			return if (!endResult.isNaN()) endResult.toString() else "∞"
 		} catch(err: EmptyStackException) {
-			return 0.0
+			return "Invalid Equation"
 		}
 	}
 
@@ -136,4 +137,4 @@ class Gui: View("Postfix Calculator") {
 	}
 }
 
-class EqSol (var eq:String, var sol:Double)
+class EqSol (var eq:String, var sol:String)
