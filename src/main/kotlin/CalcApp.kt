@@ -1,6 +1,6 @@
 //****************************************************************************
 //
-//      filename:  main.kt
+//      filename:  CalcApp.kt
 //
 //   description:  Builds a gui and implements a Postfix Calculator
 //
@@ -26,9 +26,11 @@ import javafx.scene.image.Image
 import tornadofx.*
 import java.util.*
 
-val icon = Image("icon.png")
+fun main(args: Array<String>) {
+    launch<CalcApp>(args)
+}
 
-class CalcApp: App(icon, Gui::class)
+class CalcApp: App(Image("icon.png"), Gui::class)
 
 class Gui: View("Postfix Calculator") {
 	private val input = SimpleStringProperty()
@@ -95,7 +97,7 @@ class Gui: View("Postfix Calculator") {
 
 	private fun postfixCalc(eq: String?): String {
 		try {
-			if (eq == null) return "Null Equation"
+			if (eq == null) return "Null Expression"
 
 			val eqSplit = eq.split(" ")
 			val stack = Stack<Double>()
@@ -126,7 +128,7 @@ class Gui: View("Postfix Calculator") {
 
 			return if (!endResult.isNaN()) endResult.toString() else "∞"
 		} catch(err: EmptyStackException) {
-			return "Invalid Equation"
+			return "Invalid Expression"
 		}
 	}
 
